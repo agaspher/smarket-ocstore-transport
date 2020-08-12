@@ -2,6 +2,8 @@
 
 namespace Magazinera;
 
+include 'config.php';
+
 use Magazinera\MagazineraConfig as Config;
 use PDO;
 use CURLFile;
