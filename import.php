@@ -58,7 +58,8 @@ function loadOcProducts($ocstore_db, $products){
 
         if (in_array($product['articul'], $dbProducts)){
             $qr = "
-            update oc_product set model='{$product['name']}', image='{$image}', price={$product['price']}
+            update oc_product set model='{$product['articul']}', image='{$image}', 
+            price={$product['price']}, quantity={$product['quantity']}
             where sku='{$product['articul']}';";
         } else {
             $qr = "insert into oc_product (
@@ -67,7 +68,7 @@ function loadOcProducts($ocstore_db, $products){
                 points, tax_class_id, date_available, weight, weight_class_id, 
                 length, width, height, length_class_id, subtract, minimum, 
                 sort_order, status, viewed, date_added, date_modified)
-                values ('{$product['name']}', '{$product['articul']}', '', '', '', '', '', '', 1, 
+                values ('{$product['articul']}', '{$product['articul']}', '', '', '', '', '', '', {$product['quantity']}, 
                 5, '{$image}', 0, 1, {$product['price']}, 
                 0, 0, '2020-08-10', 0, 1, 
                 0, 0, 0, 1, 1, 1, 
@@ -89,31 +90,35 @@ function loadOcProductsDescription($ocstore_db, $aProducts) {
     };
 
     foreach ($dbProducts as $product) {
-        $product_info = array_filter($aProducts, function ($innerArray) use ($product) {
+        $productInfo = array_filter($aProducts, function ($innerArray) use ($product) {
             return ($innerArray['articul'] == $product['articul']);
         });
 
-        if ($product_info) {
-            $info = array_values($product_info)[0]['info'];
+        if ($productInfo) {
+            $info = array_values($productInfo)[0]['info'];
+            $productName = array_values($productInfo)[0]['name'];
         } else {
             $info = '';
+            $productName = $product['name'];
         };
 
-        if (in_array($product['id'], $prodIdsFromDesc)) {
-            $qr = "update oc_product_description set name='{$product['name']}', description='{$info}' where product_id={$product['id']};";
+        $productId = $product['id'];
+
+        if (in_array($productId, $prodIdsFromDesc)) {
+            $qr = "update oc_product_description set name='{$productName}', description='{$info}', meta_title='{$productName}' where product_id={$productId};";
         } else {
             $qr = "insert into oc_product_description (product_id, language_id, name, description, tag, meta_title, meta_description, meta_keyword) 
-                values ('{$product['id']}', 1, '{$product['name']}', '{$info}', '', '', '', '');";
+                values ('{$productId}', 1, '{$productName}', '{$info}', '', '{$productName}', '', '');";
         }
 
         $state = $ocstore_db->prepare($qr);
         $state->execute();
 
-        if (in_array($product['id'], $prodIdsFromDesc)) {
+        if (in_array($productId, $prodIdsFromDesc)) {
             continue;
         }
 
-        $sql = "insert into oc_product_to_store (product_id, store_id) values ('{$product['id']}', 0);";
+        $sql = "insert into oc_product_to_store (product_id, store_id) values ('{$productId}', 0);";
 
         $state = $ocstore_db->prepare($sql);
         $status = $state->execute();
@@ -126,7 +131,7 @@ function loadOcProductsDescription($ocstore_db, $aProducts) {
         };
 
         $sql = "insert into oc_product_to_category (product_id, category_id, main_category) 
-                                            values ('{$product['id']}', '{$classif}', 1);";
+                                            values ('{$productId}', '{$classif}', 1);";
 
         $state = $ocstore_db->prepare($sql);
         $status = $state->execute();
