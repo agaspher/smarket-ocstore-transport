@@ -204,8 +204,12 @@ function loadOcCategories($ocstore_db)
     $state->execute();
 
     foreach ($classif as $category) {
+	$parent_id = 0;
+	if ($category['parent_id'] > 0) {
+		$parent_id = $category['parent_id'];
+	}
         $sql = "insert into oc_category (category_id, image, parent_id, top, `column`, sort_order, status, date_added, date_modified) 
-                values ('{$category['category_id']}', '', '{$category['parent_id']}', 1, 1, 0, 1, '2017-02-01', '2017-02-01')";
+                values ('{$category['category_id']}', '', '{$parent_id}', 1, 1, 0, 1, '2017-02-01', '2017-02-01')";
 
 
         $state = $ocstore_db->prepare($sql);
