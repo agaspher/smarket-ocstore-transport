@@ -19,12 +19,16 @@ $sm_db_image = get_connection(Config::SM_IMG_DB, Config::SM_DB_USER, Config::SM_
 function exportCardsFromSmToJson($sm_db, $sm_db_image) {
     $cards = [];
 
-    $query = "select distinct cs.articul, csi.info, ccf.classif, cs.mesuriment, cs.shortname, dc.price_rub, ct.name_country from cardscla cs
+    $query = "select distinct cs.articul, csi.info, ccf.classif, cs.mesuriment, cs.shortname, dc.price_rub, ct.name_country 
+            from cardscla cs
        left join country ct on cs.country=ct.id_country
             left join disccard dc on cs.articul=dc.articul
 			left join cardclassif ccf on ccf.articul = cs.articul
 			left join cardscla_info csi on cs.articul=csi.articul
-           where cs.is_accept like 'T' and dc.price_kind=".Config::PRICE_KIND." and ccf.classif_type=".Config::CLASSIF_TYPE."and dc.price_rub <> 0 and cs.articul in (
+			left join ostatok_short os on cs.articul=os.articul
+           where cs.is_accept like 'T' and dc.price_kind=".Config::PRICE_KIND." 
+            and ccf.classif_type=".Config::CLASSIF_TYPE."and dc.price_rub <> 0 
+            and os.place_index=".Config::PLACE_INDEX." and cs.articul in (
            select distinct articul from cardfoto);";
 
     $count = 0;
@@ -111,7 +115,7 @@ $data = [
 
 $ch = curl_init();
 
-curl_setopt($ch, CURLOPT_URL, UPLOAD_URL);
+curl_setopt($ch, CURLOPT_URL, Config::UPLOAD_URL);
 curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
