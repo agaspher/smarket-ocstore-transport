@@ -36,6 +36,11 @@ function loadDataFromJsonToOcStore($ocstore_db, $clear = False)
     }
 
     $f_raw = file_get_contents(Config::IMP_JSON_DIR . '/cards.json');
+
+    if ($f_raw === False) {
+        throw new \Exception("File ". Config::IMP_JSON_DIR . '/cards.json' ." not found.");
+    }
+
     $aProducts = json_decode($f_raw, true);
 
     loadOcProducts($ocstore_db, $aProducts);
@@ -196,6 +201,11 @@ function deleteLoop($ocstore_db)
 function loadOcCategories($ocstore_db)
 {
     $f_raw = file_get_contents(Config::IMP_JSON_DIR . '/classif.json');
+
+    if ($f_raw === False) {
+        throw new \Exception("File " . Config::IMP_JSON_DIR . '/classif.json' . " not found.");
+    }
+
     $classif = json_decode($f_raw, true);
 
     $sql = "delete from oc_category; delete from oc_category_description; delete from oc_category_to_store";
