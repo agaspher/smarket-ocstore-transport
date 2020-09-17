@@ -17,6 +17,7 @@ class MagazineraConfig
     const ARCHIEVE = "data.tar";
     const PRICE_KIND = 0;
     const CLASSIF_TYPE = 0;
+    const PLACE_INDEX = 1;
 
     // import
     const OCS_DB = "mysql:host=localhost;dbname=dbname;charset=utf8";

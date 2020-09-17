@@ -10,17 +10,17 @@ use PDO;
 
 $db = get_connection(Config::OCS_DB, Config::OCS_DB_USER, Config::OCS_DB_PASS);
 
-loadProductsFromJsonToOcStore($db);
+loadDataFromJsonToOcStore($db);
 
 
-// function section
-function getArrayIdFromProducts($ocstore_db) {
+function getArrayIdFromProducts($ocstore_db)
+{
     $sql = "select product_id, model, sku from oc_product;";
     $aProducts = [];
 
     foreach ($ocstore_db->query($sql) as $product) {
         $aProducts[$product['sku']] = [
-            'id'    => $product['product_id'],
+            'id' => $product['product_id'],
             'articul' => $product['sku'],
             'name' => $product['model']
         ];
@@ -29,20 +29,23 @@ function getArrayIdFromProducts($ocstore_db) {
     return $aProducts;
 }
 
-function loadProductsFromJsonToOcStore($ocstore_db, $clear=False){
+function loadDataFromJsonToOcStore($ocstore_db, $clear = False)
+{
     if ($clear) {
         deleteAllProducts($ocstore_db);
     }
 
-    $f_raw = file_get_contents(Config::IMP_JSON_DIR.'/cards.json');
+    $f_raw = file_get_contents(Config::IMP_JSON_DIR . '/cards.json');
     $aProducts = json_decode($f_raw, true);
 
     loadOcProducts($ocstore_db, $aProducts);
     loadOcProductsDescription($ocstore_db, $aProducts);
+    loadOcCategories($ocstore_db);
 }
 
 
-function loadOcProducts($ocstore_db, $products){
+function loadOcProducts($ocstore_db, $products)
+{
     $dbProducts = [];
     $qr = "select sku from oc_product;";
     foreach ($ocstore_db->query($qr) as $rec) {
@@ -56,7 +59,7 @@ function loadOcProducts($ocstore_db, $products){
             $image = '';
         }
 
-        if (in_array($product['articul'], $dbProducts)){
+        if (in_array($product['articul'], $dbProducts)) {
             $qr = "
             update oc_product set model='{$product['articul']}', image='{$image}', 
             price={$product['price']}, quantity={$product['quantity']}
@@ -81,7 +84,8 @@ function loadOcProducts($ocstore_db, $products){
 }
 
 
-function loadOcProductsDescription($ocstore_db, $aProducts) {
+function loadOcProductsDescription($ocstore_db, $aProducts)
+{
     $dbProducts = getArrayIdFromProducts($ocstore_db);
     $prodIdsFromDesc = [];
     $qr = "select product_id from oc_product_description;";
@@ -135,26 +139,63 @@ function loadOcProductsDescription($ocstore_db, $aProducts) {
 
         $state = $ocstore_db->prepare($sql);
         $status = $state->execute();
-}
-
-//    foreach ($products as $product) {
-//        $sql = "insert into oc_product_description (product_id, language_id, name, description, tag, meta_title, meta_description, meta_keyword)
-//                                            values ('{$product['id']}', 1, '{$product['name']}', '', '', '', '', '');";
-//
-//        $state = $conn->prepare($sql);
-//        $state->execute();
-//
-//        $sql = "insert into oc_product_description (product_id, language_id, name, description, tag, meta_title, meta_description, meta_keyword)
-//                                            values ('{$product['id']}', 2, '{$product['name']}', '', '', '', '', '');";
-//
-//        $state = $conn->prepare($sql);
-//        $state->execute();
-//    }
+    }
 }
 
 
-function importClassifFromJSONtoOcstore($ocstore_db) {
-    $f_raw = file_get_contents(Config::IMP_JSON_DIR.'/classif.json');
+function deleteEmptyCategories($ocstore_db)
+{
+    $category_id_with_products = [];
+    $sql = "select distinct category_id from oc_product_to_category";
+    foreach ($ocstore_db->query($sql) as $id) {
+        array_push($category_id_with_products, $id['category_id']);
+    };
+
+    $category_id_with_subcategories = [];
+    $sql = "select distinct parent_id from oc_category";
+    foreach ($ocstore_db->query($sql) as $id) {
+        array_push($category_id_with_subcategories, $id['parent_id']);
+    };
+
+    $categories = [];
+    $sql = "select distinct category_id from oc_category";
+    foreach ($ocstore_db->query($sql) as $id) {
+        array_push($categories, $id['category_id']);
+    };
+
+    $empty_categories = [];
+    foreach ($categories as $key => $value) {
+        if (!(in_array($value, $category_id_with_products) || in_array($value, $category_id_with_subcategories))) {
+            array_push($empty_categories, $value);
+        };
+    };
+
+    foreach ($empty_categories as $key => $value) {
+        $sql = "delete from oc_category where category_id = '{$value}';
+                delete from oc_category_description where category_id = '{$value}';
+                delete from oc_category_to_store where category_id = '{$value}';";
+
+        $state = $ocstore_db->prepare($sql);
+        $state->execute();
+    };
+
+    return $empty_categories;
+}
+
+
+function deleteLoop($ocstore_db)
+{
+    $result = deleteEmptyCategories($ocstore_db);
+
+    if ($result) {
+        deleteLoop($ocstore_db);
+    }
+}
+
+
+function loadOcCategories($ocstore_db)
+{
+    $f_raw = file_get_contents(Config::IMP_JSON_DIR . '/classif.json');
     $classif = json_decode($f_raw, true);
 
     $sql = "delete from oc_category; delete from oc_category_description; delete from oc_category_to_store";
@@ -188,54 +229,19 @@ function importClassifFromJSONtoOcstore($ocstore_db) {
 
         $state = $ocstore_db->prepare($sql);
         $state->execute();
-    };
-}
 
-function deleteEmptyCategories($ocstore_db) {
-    $category_id_with_products = [];
-    $sql = "select distinct category_id from oc_product_to_category";
-    foreach ($ocstore_db->query($sql) as $id) {
-        array_push($category_id_with_products, $id['category_id']);
-    };
-
-    $category_id_with_subcategories =[];
-    $sql = "select distinct parent_id from oc_category";
-    foreach ($ocstore_db->query($sql) as $id) {
-        array_push($category_id_with_subcategories, $id['parent_id']);
-    };
-
-    $categories = [];
-    $sql = "select distinct category_id from oc_category";
-    foreach ($ocstore_db->query($sql) as $id) {
-        array_push($categories, $id['category_id']);
-    };
-
-    // print_r($category_id_with_products);
-    // print_r($category_id_with_subcategories);
-    // print_r($categories);
-
-    $empty_categories = [];
-    foreach ($categories as $key => $value) {
-        if (!(in_array($value, $category_id_with_products) || in_array($value, $category_id_with_subcategories))) {
-            array_push($empty_categories, $value);
-        };
-    };
-
-    // print_r($empty_categories);
-
-    foreach ($empty_categories as $key => $value) {
-        $sql = "delete from oc_category where category_id = '{$value}';
-                delete from oc_category_description where category_id = '{$value}';
-                delete from oc_category_to_store where category_id = '{$value}';";
+        $sql = "insert into oc_category_path (category_id, path_id, level)
+                values ('{$category['category_id']}', '{$category['category_id']}', 1)";
 
         $state = $ocstore_db->prepare($sql);
         $state->execute();
     };
 
-    return $empty_categories;
-};
+    deleteEmptyCategories($ocstore_db);
+}
 
-function deleteAllProducts($ocstore_db){
+function deleteAllProducts($ocstore_db)
+{
     $sql = [
         "delete from oc_product_to_store;",
         "delete from oc_product_to_category;",
@@ -247,18 +253,7 @@ function deleteAllProducts($ocstore_db){
     $state->execute();
 }
 
-function get_connection($uri, $db_user, $db_pass) {
+function get_connection($uri, $db_user, $db_pass)
+{
     return new PDO($uri, $db_user, $db_pass);
 }
-
-//importClassifFromJSONtoOcstore($db);
-//
-//function deleteLoop($db) {
-//    $result = deleteEmptyCategories($db);
-//
-//    if ($result) {
-//        deleteLoop($db);
-//    }
-//};
-//
-//deleteLoop($db);
