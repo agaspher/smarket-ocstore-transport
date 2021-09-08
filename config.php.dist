@@ -1,9 +1,9 @@
 <?php
 
-namespace Magazinera;
+namespace Globus;
 
 
-class MagazineraConfig
+class GlobusConfig
 {
     // export
     const SM_DB = "firebird:host=localhost;dbname=C:\\S-Market\\DBase\\SMARKET.FDB;charset=win1251";
