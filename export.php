@@ -110,6 +110,7 @@ print("archieved...");
 
 $curl_file = new CURLFile(Config::ARCHIEVE);
 $data = [
+    "verify" => Config::VERIFY,
     "file" => $curl_file,
 ];
 
