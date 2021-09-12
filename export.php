@@ -1,10 +1,10 @@
 <?php
 
-namespace Magazinera;
+namespace Globus;
 
-include 'config.php';
+include 'import.config.php';
 
-use Magazinera\MagazineraConfig as Config;
+use Globus\GlobusConfig as Config;
 use PDO;
 use CURLFile;
 

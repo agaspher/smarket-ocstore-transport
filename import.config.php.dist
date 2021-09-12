@@ -1,9 +1,9 @@
 <?php
 
-namespace Magazinera;
+namespace ShopName;
 
 
-class MagazineraConfig
+class ShopNameConfig
 {
     // export
     const SM_DB = "firebird:host=localhost;dbname=C:\\S-Market\\DBase\\SMARKET.FDB;charset=win1251";

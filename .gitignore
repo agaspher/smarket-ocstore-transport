@@ -1,5 +1,7 @@
-config.php
+import.config.php
+import.php
 www
 admin
 catalog
+json
 .idea/

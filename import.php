@@ -1,11 +1,15 @@
 <?php
 
-namespace Magazinera;
+namespace Globus;
 
-include 'config.php';
+include 'import.config.php';
 
-use Magazinera\MagazineraConfig as Config;
+use Globus\GlobusConfig as Config;
 use PDO;
+
+$fp = fopen('globus.log', 'w');
+fwrite($fp, "================start logging ".date("Y-m-d H:i:s")."====================");
+fclose($fp);
 
 
 $db = get_connection(Config::OCS_DB, Config::OCS_DB_USER, Config::OCS_DB_PASS);
@@ -93,11 +97,19 @@ function loadOcProductsDescription($ocstore_db, $aProducts)
 {
     $dbProducts = getArrayIdFromProducts($ocstore_db);
     $prodIdsFromDesc = [];
+    $productIdsCategory = [];
+
     $qr = "select product_id from oc_product_description;";
     foreach ($ocstore_db->query($qr) as $rec) {
         array_push($prodIdsFromDesc, $rec['product_id']);
     };
 
+    $qr = "select distinct product_id from oc_product_to_category;";
+    foreach ($ocstore_db->query($qr) as $rec) {
+        array_push($productIdsCategory, $rec['product_id']);
+    };
+
+    print_r("Find ".count($aProducts)." products in file.");
     foreach ($dbProducts as $product) {
         $productInfo = array_filter($aProducts, function ($innerArray) use ($product) {
             return ($innerArray['articul'] == $product['articul']);
@@ -123,15 +135,7 @@ function loadOcProductsDescription($ocstore_db, $aProducts)
         $state = $ocstore_db->prepare($qr);
         $state->execute();
 
-        if (in_array($productId, $prodIdsFromDesc)) {
-            continue;
-        }
-
-        $sql = "insert into oc_product_to_store (product_id, store_id) values ('{$productId}', 0);";
-
-        $state = $ocstore_db->prepare($sql);
-        $status = $state->execute();
-
+        // привязка к категории
         $classif = '';
         foreach ($aProducts as $p) {
             if ($p['articul'] == $product['articul']) {
@@ -139,8 +143,23 @@ function loadOcProductsDescription($ocstore_db, $aProducts)
             };
         };
 
-        $sql = "insert into oc_product_to_category (product_id, category_id, main_category) 
-                                            values ('{$productId}', '{$classif}', 1);";
+        if (in_array($productId, $productIdsCategory)) {
+            $sql = "update oc_product_to_category set category_id = '{$classif}' 
+                                            where product_id = '{$productId}';";
+        } else {
+            $sql = "insert into oc_product_to_category (product_id, category_id) 
+                                            values ('{$productId}', '{$classif}');";
+        }
+
+        print_r($sql . PHP_EOL);
+        $state = $ocstore_db->prepare($sql);
+        $status = $state->execute();
+
+        if (in_array($productId, $prodIdsFromDesc)) {
+            continue;
+        }
+
+        $sql = "insert into oc_product_to_store (product_id, store_id) values ('{$productId}', 0);";
 
         $state = $ocstore_db->prepare($sql);
         $status = $state->execute();
@@ -270,4 +289,12 @@ function deleteAllProducts($ocstore_db)
 function get_connection($uri, $db_user, $db_pass)
 {
     return new PDO($uri, $db_user, $db_pass);
+}
+
+function debugThis($message) {
+    print_r($message . PHP_EOL);
+}
+
+function logging($msg) {
+
 }

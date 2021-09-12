@@ -1,4 +1,4 @@
-# magazinera
+# smarket-ocstore-transport
 
 Параметры:
 
@@ -22,3 +22,9 @@
     OCS_DB_PASS - пароль пользователя базы данных
     IMP_JSON_DIR - путь, где сохранены файлы для импорта
     OCS_IMG_PATH - путь хранения изображений в oc_store
+
+# wiki
+
+1. создание контроллера в ocstore для загрузки архива с фотками и json 
+2. для кастомных контроллеров ocstore, если лежит в controller/hash/entry.php то адрес будет https://site.com/index.php?route=hash/entry
+3. для кирилических доменов - урлы для php curl и консольного curl на маке, лучше преобразовывать из IDN в ACE
