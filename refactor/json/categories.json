@@ -1,0 +1,17 @@
+[
+  {
+    "category_id": 1200,
+    "parent_id": -1,
+    "name": "Каталог товаров"
+  },
+  {
+    "category_id": 1203,
+    "parent_id": 1200,
+    "name": "Мужчинам"
+  },
+  {
+    "category_id": 1204,
+    "parent_id": 1200,
+    "name": "Женщинам"
+  }
+]

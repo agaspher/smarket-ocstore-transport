@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+    php:
+        build:
+            context: .
+            args:
+                - UID=${UID:-1000}
+                - GID=${GID:-1000}
+        entrypoint: ["/bin/bash"]
+        volumes:
+            - nfsmount:/app
+        networks:
+            - globus-network
+
+    maria:
+        image: mariadb:10.5.17
+        platform: linux/x86_64
+        environment:
+            MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
+            MARIADB_DATABASE: "globus"
+        networks:
+            - globus-network
+        ports:
+            -   "3306:3306"
+        volumes:
+            -   docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+    grafana:
+        image: grafana/grafana
+        ports:
+            - '3000:3000'
+        environment:
+            - GF_SECURITY_ADMIN_USER=admin
+            - GF_SECURITY_ADMIN_PASSWORD=grafana
+#        volumes:
+#            - grafana-datasources:/etc/grafana/provisioning/datasources
+#            - grafana-data:/var/lib/grafana
+        networks:
+            - globus-network
+
+volumes:
+    docker-entrypoint-initdb.d:
+        driver: local
+        driver_opts:
+            type: nfs
+            o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+            device: ":${PWD}/docker/db/docker-entrypoint-initdb.d"
+
+    nfsmount:
+        driver: local
+        driver_opts:
+            type: nfs
+            o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+            device: ":${PWD}"
+
+networks:
+    globus-network:
+        external: true
