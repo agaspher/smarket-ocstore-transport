@@ -22,7 +22,7 @@ class ProductOptionValueRepository extends EntityRepository
             'where',
             $qb->expr()->andX(
                 $qb->expr()->in('pov.productId', array_unique($ids)),
-                $qb->expr()->eq('pov.optionId', Config::DEFAULT_OPTION_ID)
+                $qb->expr()->eq('pov.optionId', Config::$defaultOptionId)
             )
         );
         $values = $qb->getQuery()->getResult();

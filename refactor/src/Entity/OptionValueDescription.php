@@ -14,7 +14,7 @@ class OptionValueDescription
 {
     #[ORM\Id]
     #[ORM\Column(name: 'language_id', nullable: false)]
-    private int $languageId = Config::DEFAULT_LANGUAGE_ID;
+    private int $languageId;
 
     #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: OptionValue::class, inversedBy: 'descriptions')]
@@ -27,6 +27,11 @@ class OptionValueDescription
 
     #[ORM\Column(name: 'name', type: 'string', length: 128, nullable: false)]
     private string $name = '';
+
+    public function __construct()
+    {
+        $this->languageId = Config::$defaultLanguageId;
+    }
 
     public function getOptionValue(): OptionValue
     {

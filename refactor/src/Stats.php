@@ -11,8 +11,8 @@ use Doctrine\ORM\EntityManager;
 
 class Stats
 {
-    private ?DateTimeImmutable $startTime = null;
-    private ?DateTimeImmutable $endTime = null;
+    private ?DateTimeImmutable $startTime;
+    private ?DateTimeImmutable $endTime;
 
     private int $usedMemory = 0; // in seconds
 
@@ -20,10 +20,11 @@ class Stats
     private int $transactionCount = 0;
     private int $rowCountInTransaction = 0;
     private int $rowsCountInFile = 0;
-    private int $productsCountUpdated = 0;
-    private int $productsCountCreated = 0;
+    private int $countUpdated = 0;
+    private int $countCreated = 0;
 
     private array $errors = [];
+    private string $importType = 'Undefined';
 
     private EntityManager $em;
 
@@ -118,26 +119,26 @@ class Stats
         return $this;
     }
 
-    public function getProductsCountUpdated(): int
+    public function getCountUpdated(): int
     {
-        return $this->productsCountUpdated;
+        return $this->countUpdated;
     }
 
-    public function setProductsCountUpdated(int $productsCountUpdated): self
+    public function setCountUpdated(int $countUpdated): self
     {
-        $this->productsCountUpdated = $productsCountUpdated;
+        $this->countUpdated = $countUpdated;
 
         return $this;
     }
 
-    public function getProductsCountCreated(): int
+    public function getCountCreated(): int
     {
-        return $this->productsCountCreated;
+        return $this->countCreated;
     }
 
-    public function setProductsCountCreated(int $productsCountCreated): self
+    public function setCountCreated(int $countCreated): self
     {
-        $this->productsCountCreated = $productsCountCreated;
+        $this->countCreated = $countCreated;
 
         return $this;
     }
@@ -175,18 +176,18 @@ class Stats
         return $this->rowsCountInFile;
     }
 
-    public function incrementProductsCountUpdated(): int
+    public function incrementCountUpdated(): int
     {
-        $this->productsCountUpdated++;
+        $this->countUpdated++;
 
-        return $this->productsCountUpdated;
+        return $this->countUpdated;
     }
 
-    public function incrementProductsCountCreated(): int
+    public function incrementCountCreated(): int
     {
-        $this->productsCountCreated++;
+        $this->countCreated++;
 
-        return $this->productsCountCreated;
+        return $this->countCreated;
     }
 
     public function getDuration(): int
@@ -198,18 +199,42 @@ class Stats
     {
         $this->errors[] = $error;
 
-        if (count($this->errors) > Config::ERROR_LIST_LENGTH) {
+        if (count($this->errors) > Config::$errorListLength) {
             $this->saveLog();
         }
     }
 
-    private function saveLog(): void
+    public function getImportType(): string
+    {
+        return $this->importType;
+    }
+
+    public function setImportType(string $importType): self
+    {
+        $this->importType = $importType;
+
+        return $this;
+    }
+
+    public function removeOldLog(): void
+    {
+        // remove all logs older than month
+        $qb = $this->em->createQueryBuilder();
+        $qb->delete()
+            ->from(Log::class, 'l')
+            ->where('l.dateAdded <= :targetDate')
+            ->setParameter('targetDate', (new DateTimeImmutable('-1 month'))->format('Y-m-d'));
+
+        $qb->getQuery()->getResult();
+    }
+
+    public function saveLog(): void
     {
         foreach ($this->getErrors() as $errors) {
             foreach ($errors as $entityId => $message) {
                 $newLog = (new Log())
                     ->setEntityId($entityId)
-//                    ->setImportType($importType)
+                    ->setImportType($this->getImportType())
                     ->setMsg($message);
 
                 $this->em->persist($newLog);

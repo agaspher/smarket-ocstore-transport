@@ -18,7 +18,7 @@ class OptionValueDescriptionRepository extends EntityRepository
             'where',
             $qb->expr()->andX(
                 $qb->expr()->in('ovd.name', array_unique($names)),
-                $qb->expr()->eq('ovd.languageId', Config::DEFAULT_LANGUAGE_ID)
+                $qb->expr()->eq('ovd.languageId', Config::$defaultLanguageId)
             )
         );
 

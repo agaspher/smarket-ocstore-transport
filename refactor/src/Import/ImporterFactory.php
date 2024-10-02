@@ -32,10 +32,15 @@ class ImporterFactory
         foreach (self::AVAILABLE_IMPORTERS as $available) {
             if ($available::matches($targetClass)) {
                 $importer = new $available();
+                $stats = new Stats($em);
+
+                $className = explode('\\', $targetClass);
+                $stats->setImportType(array_pop($className));
+
                 $importer->setSource($path)
                     ->setValidator(new ImportValidator())
                     ->setReader($this->getReader($path))
-                    ->setStats(new Stats($em));
+                    ->setStats($stats);
             }
         }
 

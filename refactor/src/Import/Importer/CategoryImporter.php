@@ -57,6 +57,7 @@ class CategoryImporter implements ImporterInterface
         $progressIndicator->finish('Finish processing categories.');
         $this->stats->setEndTime(new DateTimeImmutable('now'));
 
+        $this->stats->saveLog();
         return $this->stats;
     }
 
@@ -149,24 +150,37 @@ class CategoryImporter implements ImporterInterface
         }
     }
 
+    /**
+     * Main action for category import
+     *
+     * logic:
+     * we go through all categories from dataset and try to find category in existed categories
+     * if category exist, we update it
+     * if category not exist, we create new category
+     * after that we try to find existed path (parent->child relations) for category if it not exist, we add it
+     * and tie category with store
+     */
     private function saveCategoriesToDb(array $dataSet): void
     {
         $existedCategories = $this->em->getRepository(Category::class)->getCategories();
 
         /** @var CategoryDto $data */
         $this->em->beginTransaction();
+        $this->stats->incrementTransactionCount();
         foreach ($dataSet as $data) {
             /** @var Category $currentCategory */
             $currentCategory = $existedCategories[$data->getCategoryId()] ?? null;
 
             if ($currentCategory) {
                 $currentCategory->setParentId($data->getParentId());
+                $this->stats->incrementCountUpdated();
             } else {
                 $currentCategory = (new Category())
                     ->setCategoryId($data->getCategoryId())
                     ->setParentId($data->getParentId());
                 $existedCategories[$data->getCategoryId()] = $currentCategory;
 
+                $this->stats->incrementCountCreated();
                 $this->em->persist($currentCategory);
             }
 

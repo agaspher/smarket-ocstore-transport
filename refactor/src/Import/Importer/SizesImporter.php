@@ -52,6 +52,7 @@ class SizesImporter implements ImporterInterface
 
         $progressIndicator->finish('Finish processing sizes.');
 
+        $this->stats->saveLog();
         return $this->stats;
     }
 
@@ -109,12 +110,55 @@ class SizesImporter implements ImporterInterface
     {
         if (!$this->isSizeOptionExists()) {
             throw new Exception(
-                sprintf('Option for size with default id=[%s] doesn\'t exist!', Config::DEFAULT_OPTION_ID)
+                sprintf('Option for size with default id=[%s] doesn\'t exist!', Config::$defaultOptionId)
             );
         }
 
         $this->createOptionValues($sizes);
         $this->tieSizeWithProduct($sizes);
+    }
+
+    /**
+     * Option - properties for products (in our case "size", id=13)
+     * OptionDescription - name of property in different languages (in our case "Размер" for language_id=1)
+     * OptionValue - size (logical value, lately here we can relate with names from OptionValueDescription)
+     * OptionValueDescription - value (name, shown to user) of property (in our case size like a string, ex: XL, M, L)
+     *
+     * Creates new option values (the sizes for given size names if they don't exist in DB.
+     * Creates new descriptions for them in default language.
+     */
+    private function createOptionValues(array $sizes): void
+    {
+        $names = array_map(fn(SizeDto $size) => $size->getRus(), $sizes);
+
+        $defaultOption = $this->em->getRepository(Option::class)
+            ->findOneBy(['optionId' => Config::$defaultOptionId]);
+        $sizeOptions = $this->em->getRepository(OptionValueDescription::class)->getOptionValueByName($names);
+
+        $this->em->beginTransaction();
+        $this->stats->incrementTransactionCount();
+
+        foreach ($names as $name) {
+            if (!($sizeOptions[$name] ?? null)) {
+                $newOptionValueDesc = (new OptionValueDescription())
+                    ->setName($name)
+                    ->setLanguageId(Config::$defaultLanguageId)
+                    ->setOption($defaultOption);
+
+                $newOptionValue = (new OptionValue())
+                    ->addDescription($newOptionValueDesc)
+                    ->setOption($defaultOption);
+
+                $this->em->persist($newOptionValue);
+                $this->em->persist($newOptionValueDesc);
+
+                $this->stats->incrementCountCreated();
+                $sizeOptions[$name] = $newOptionValueDesc;
+            }
+        }
+
+        $this->em->flush();
+        $this->em->commit();
     }
 
     private function isSizeOptionExists(): bool
@@ -125,43 +169,11 @@ class SizesImporter implements ImporterInterface
 
         $sizeOption = $this->em
             ->getRepository(Option::class)
-            ->findOneBy(['optionId' => Config::DEFAULT_OPTION_ID]);
+            ->findOneBy(['optionId' => Config::$defaultOptionId]);
         $sizeOptionDesc = $this->em->getRepository(OptionDescription::class)
-            ->findOneBy(['optionId' => Config::DEFAULT_OPTION_ID, 'languageId' => Config::DEFAULT_LANGUAGE_ID]);
+            ->findOneBy(['optionId' => Config::$defaultOptionId, 'languageId' => Config::$defaultLanguageId]);
 
         return $sizeOption && $sizeOptionDesc;
-    }
-
-    private function createOptionValues(array $sizes): void
-    {
-        $names = array_map(fn(SizeDto $size) => $size->getRus(), $sizes);
-
-        $defaultOption = $this->em->getRepository(Option::class)
-            ->findOneBy(['optionId' => Config::DEFAULT_OPTION_ID]);
-        $sizeOptions = $this->em->getRepository(OptionValueDescription::class)->getOptionValueByName($names);
-
-        $this->em->beginTransaction();
-
-        foreach ($names as $name) {
-            if (!($sizeOptions[$name] ?? null)) {
-                $newOptionValueDesc = (new OptionValueDescription())
-                    ->setName($name)
-                    ->setLanguageId(Config::DEFAULT_LANGUAGE_ID)
-                    ->setOption($defaultOption);
-
-                $newOptionValue = (new OptionValue())
-                    ->addDescription($newOptionValueDesc)
-                    ->setOption($defaultOption);
-
-                $this->em->persist($newOptionValue);
-                $this->em->persist($newOptionValueDesc);
-
-                $sizeOptions[$name] = $newOptionValueDesc;
-            }
-        }
-
-        $this->em->flush();
-        $this->em->commit();
     }
 
     private function tieSizeWithProduct(array $sizes): void
@@ -185,7 +197,7 @@ class SizesImporter implements ImporterInterface
         foreach ($ties as $tie) {
             $name = $tie->getOptionValue()
                 ->getDescriptions()
-                ->filter(fn($desc) => $desc->getLanguageId() === Config::DEFAULT_LANGUAGE_ID)
+                ->filter(fn($desc) => $desc->getLanguageId() === Config::$defaultLanguageId)
                 ->first()?->getName();
 
             if ($name) {

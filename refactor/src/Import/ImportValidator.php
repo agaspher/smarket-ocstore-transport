@@ -25,6 +25,10 @@ class ImportValidator
             }
         }
 
+        if (is_array($errors)) {
+            $errors = new ConstraintViolationList($errors);
+        }
+
         return $errors;
     }
 }

@@ -56,9 +56,14 @@ class ProductImporter implements ImporterInterface
         $this->stats->setEndTime(new DateTimeImmutable('now'));
         $progressIndicator->finish('Finish processing products.');
 
+        $this->stats->saveLog();
         return $this->stats;
     }
 
+    /**
+     * Create categories from products if they don't exist. This categories will be used when we saving products to database.
+     * Categories will be saved to database in the same transaction as products.
+     */
     private function createCategoriesFromProducts(array $dataSet): void
     {
         $existedCategories = $this->em->getRepository(Category::class)->getCategories();
@@ -97,11 +102,15 @@ class ProductImporter implements ImporterInterface
         }
     }
 
+    /**
+     * If extra image (the regular image is stored in product table) already exist, it will be updated.
+     * If extra image not exist, it will be created.
+     */
     private function loadExtraImages(Product $product, ProductDto $data): void
     {
         if ($data->photoCount() > 1) {
             foreach ($data->getExtraImages() as $image) {
-                $processingImage = Config::OCS_IMG_PATH . '/' . $image;
+                $processingImage = Config::$ocsImgPath . '/' . $image;
 
                 $dbExtraImage = $product->getExtraImage($processingImage);
 
@@ -164,11 +173,11 @@ class ProductImporter implements ImporterInterface
 
     private function updateProduct(Product $product, ProductDto $data): Product
     {
-        $this->stats->incrementProductsCountUpdated();
+        $this->stats->incrementCountUpdated();
 
         $product
             ->setModel($data->getArticul())
-            ->setImage(Config::OCS_IMG_PATH . '/' . $data->getFirstImage())
+            ->setImage(Config::$ocsImgPath . '/' . $data->getFirstImage())
             ->setPrice($data->getPrice())
             ->setMpn($data->getMpn());
 
@@ -177,16 +186,20 @@ class ProductImporter implements ImporterInterface
 
     private function createProduct(ProductDto $product): Product
     {
-        $this->stats->incrementProductsCountCreated();
+        $this->stats->incrementCountCreated();
 
         return (new Product())
             ->setModel($product->getArticul())
             ->setSku($product->getArticul())
-            ->setImage(Config::OCS_IMG_PATH . '/' . $product->getFirstImage())
+            ->setImage(Config::$ocsImgPath . '/' . $product->getFirstImage())
             ->setPrice($product->getPrice())
             ->setMpn($product->getMpn());
     }
 
+    /**
+     * Save products to database. It creates categories from products if they not exist.
+     * If product exist in database, it will be updated, otherwise new product will be created
+     */
     private function saveProductsToDb(array $dataSet): void
     {
         $this->createCategoriesFromProducts($dataSet);
@@ -224,7 +237,7 @@ class ProductImporter implements ImporterInterface
         $this->em->clear();
 
         // we can make it over insertOnDuplicate but its terribly slow
-        // so still here only for experiment
+        // so still here only for experiment but it works and can be used
 //        $newProducts = [];
 //
 //        /** @var ProductDto $product */
@@ -240,6 +253,11 @@ class ProductImporter implements ImporterInterface
 //        $this->insertOnDuplicateKey($newProducts);
     }
 
+    /**
+     * Ties product with category
+     * If category not exist, we create it
+     * If product already has category, we remove it from this category and tie with the new one
+     */
     private function tieWithCategory(Product $product, ProductDto $data): void
     {
         $categories = $this->em->getRepository(Category::class)->getCategories();
@@ -261,6 +279,10 @@ class ProductImporter implements ImporterInterface
         $product->addCategory($newCat);
     }
 
+    /**
+     * Ties product with store
+     * If product already has store, we do nothing
+     */
     private function tieWithStore(Product $product): void
     {
         $store = $product->getStore();
