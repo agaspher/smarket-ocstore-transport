@@ -148,10 +148,6 @@ class ProductImporter implements ImporterInterface
         $values = [];
         foreach ($products as $product) {
             $values[] = $this->serializer->normalize($product, null, ['groups' => 'sm_import']);
-
-//            $values[] = "(" . join(",", array_values($normalized)) . ")";
-//            die();
-//            break;
         }
 
         $questionMarks = array_fill(0, count($values[0]), '?');

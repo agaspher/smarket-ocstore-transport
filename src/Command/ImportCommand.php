@@ -31,7 +31,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'import-products',
-    description: 'Run import products from json to DB',
+    description: 'Run import from json to DB',
     aliases: ['i-p'],
 )]
 class ImportCommand extends Command
@@ -57,23 +57,28 @@ class ImportCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        /** if we are clearing database, we don't need to import */
         if ($input->getOption('clear-all') === null) {
             return $this->clearDatabase($io);
         }
 
-        $io->title('Import started.');
+        $io->title('Import starts.');
 
         $mapping = [
-//            Product::class => Config::PRODUCT_FILE,
-//            Category::class => Config::CATEGORY_FILE,
-//            Option::class => Config::SIZE_FILE,
+//            Product::class => Config::$productFile,
+//            Category::class => Config::$categoryFile,
+//            Option::class => Config::$sizeFile,
 //            Product::class => 'cards615.json',
 //            Product::class => 'cards2.json',
-            Product::class => 'cards20k.json',
+            Product::class => 'output1M.json',
+//            Product::class => 'cards20k.json',
             Category::class => 'classif.json',
             Option::class => 'sizes.json',
 //            Option::class => 'sizes2.json',
         ];
+
+        $stats = new Stats($this->em);
+        $stats->removeOldLog();
 
         $factory = new ImporterFactory();
         foreach ($mapping as $target => $source) {
@@ -83,15 +88,7 @@ class ImportCommand extends Command
             $this->renderStatAsTable($stats, $io);
         }
 
-//        $importer->deactivateEmptyCategories();
-
-//        /** @var ProductRepository $repo */
-//        $repo = $this->em->getRepository(Product::class)->getProductsBySku(['05158']);
-//
-//        var_dump($repo);
-
-//        $this->renderStatAsTable($stats, $io);
-        $io->title("Import finished.");
+        $io->title("Import is finished.");
 
         return 1;
     }
@@ -105,8 +102,8 @@ class ImportCommand extends Command
             ['Duration, s', $stats->getDuration()],
             ['Used memory, Mb', $stats->getUsedMemory()],
             ['Rows founded', $stats->getRowsCountInFile()],
-            ['Products created', $stats->getProductsCountCreated()],
-            ['Products updated', $stats->getProductsCountUpdated()],
+            [sprintf('[%s] created', $stats->getImportType()), $stats->getCountCreated()],
+            [sprintf('[%s] updated', $stats->getImportType()), $stats->getCountUpdated()],
             ['Transaction count', $stats->getTransactionCount()],
         ]);
 
@@ -139,14 +136,21 @@ class ImportCommand extends Command
             Log::class => 'Log records'
         ];
 
+        $stats = new Stats($this->em);
+        $stats->setImportType('clear');
+
         $io->title('Start cleaning database.');
         foreach ($entities as $class => $msg) {
-            $io->writeln(sprintf('Deleting [%s]', $msg));
+            $msg = sprintf('Deleting [%s]', $msg);
+            $io->writeln($msg);
+            $stats->addError([$msg]);
 
             $qb = $this->em->getRepository($class)?->createQueryBuilder('t');
             $qb->delete()->getQuery()->execute();
         }
         $io->title('Database is cleared.');
+
+        $stats->saveLog();
 
         return 1;
     }

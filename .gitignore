@@ -1,7 +1,5 @@
-import.config.php
-import.php
-www
-admin
-catalog
+vendor
+.env
+*.excalidraw
+*.uml
 json
-.idea/
