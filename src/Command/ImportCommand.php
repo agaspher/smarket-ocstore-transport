@@ -65,16 +65,9 @@ class ImportCommand extends Command
         $io->title('Import starts.');
 
         $mapping = [
-//            Product::class => Config::$productFile,
-//            Category::class => Config::$categoryFile,
-//            Option::class => Config::$sizeFile,
-//            Product::class => 'cards615.json',
-//            Product::class => 'cards2.json',
-            Product::class => 'output1M.json',
-//            Product::class => 'cards20k.json',
-            Category::class => 'classif.json',
-            Option::class => 'sizes.json',
-//            Option::class => 'sizes2.json',
+            Product::class => Config::$productFile,
+            Category::class => Config::$categoryFile,
+            Option::class => Config::$sizeFile,
         ];
 
         $stats = new Stats($this->em);

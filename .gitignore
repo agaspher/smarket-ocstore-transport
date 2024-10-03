@@ -3,3 +3,4 @@ vendor
 *.excalidraw
 *.uml
 json
+src/Config/Config.php
