@@ -7,7 +7,7 @@
         "symfony/serializer": "^5.4",
         "symfony/property-access": "^5.4",
         "doctrine/orm": "^2.19",
-        "agaspher/json-parser": "dev-develop",
+        "agaspher/json-parser": "1.3.0",
         "doctrine/annotations": "2.0.x-dev"
     },
     "require-dev": {
