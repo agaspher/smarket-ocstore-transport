@@ -19,7 +19,7 @@ Config::initialize();
 $paths = ['./Entity'];
 $isDevMode = false;
 
-$config = ORMSetup::createAttributeMetadataConfiguration($paths, $isDevMode);
+$config = ORMSetup::createAnnotationMetadataConfiguration($paths, $isDevMode);
 $config->setAutoGenerateProxyClasses(ProxyFactory::AUTOGENERATE_ALWAYS);
 $connection = DriverManager::getConnection(Config::getDbConnParams(), $config);
 $entityManager = new EntityManager($connection, $config);

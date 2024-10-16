@@ -8,10 +8,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class SizeDto
 {
-    #[Assert\Length(min: 3, minMessage: "Size for very short articul")]
+    /** @Assert\Length(min=3, minMessage="Size for very short articul") */
     private ?string $articul = '';
 
-    #[Assert\Length(min: 1, minMessage: "Size with empty description")]
+    /** @Assert\Length(min=1, minMessage="Size with empty description") */
     private string $rus = '';
 
     public function getArticul(): ?string
@@ -36,6 +36,11 @@ class SizeDto
         $this->rus = $rus;
 
         return $this;
+    }
+
+    public function getEntityId(): int
+    {
+        return (int)$this->articul;
     }
 
     public static function fromArray(array $dataSet): self

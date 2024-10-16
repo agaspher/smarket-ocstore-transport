@@ -16,11 +16,11 @@ use Exception;
 
 class ImporterFactory
 {
-    public const array AVAILABLE_READERS = [
+    public const AVAILABLE_READERS = [
         JsonReader::class
     ];
 
-    public const array AVAILABLE_IMPORTERS = [
+    public const AVAILABLE_IMPORTERS = [
         ProductImporter::class,
         CategoryImporter::class,
         SizesImporter::class,

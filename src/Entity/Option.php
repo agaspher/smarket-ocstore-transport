@@ -8,24 +8,36 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: "oc_option")]
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="oc_option")
+ */
 class Option
 {
-    #[ORM\Id]
-    #[ORM\Column(name: 'option_id')]
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="option_id")
+     */
     private int $optionId = 0;
 
-    #[ORM\Column(name: 'type', length: 32, nullable: false)]
+    /**
+     * @ORM\Column(name="type", length=32, nullable=false)
+     */
     private string $type = '';
 
-    #[ORM\Column(name: 'sort_order', nullable: false)]
+    /**
+     * @ORM\Column(name="sort_order", nullable=false)
+     */
     private int $sortOrder = 0;
 
-    #[ORM\OneToMany(targetEntity: OptionValue::class, mappedBy: 'option')]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\OptionValue", mappedBy="option")
+     */
     private Collection $optionValues;
 
-    #[ORM\OneToMany(targetEntity: OptionValueDescription::class, mappedBy: 'option')]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\OptionValueDescription", mappedBy="option")
+     */
     private Collection $optionValueDescriptions;
 
     public function __construct()

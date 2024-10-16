@@ -8,25 +8,35 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class ProductDto
 {
-    #[Assert\Length(min: 3, minMessage: "Product with very short articul")]
+    /** @Assert\Length(min=3, minMessage="Product with very short articul") */
     private ?string $articul = '';
-    #[Assert\NotNull(message: "Product without category")]
+
+    /** @Assert\NotNull(message="Product without category") */
     private ?int $classif = null;
+
     private ?int $mesuriment = null;
-    #[Assert\Length(min: 10, minMessage: "Product with very short title")]
+
+    /** @Assert\Length(min=10, minMessage="Product with very short title") */
     private string $name = '';
-    #[Assert\Length(min: 5, minMessage: "Product without description")]
+
+    /** @Assert\Length(min=5, minMessage="Product without description") */
     private string $info = '';
-    #[Assert\GreaterThan(value: 0, message: "Product without price")]
+
+    /** @Assert\GreaterThan(value=0, message="Product without price") */
     private float $price = 0.0;
-    #[Assert\NotBlank(message: "Product without country")]
+
+    /** @Assert\NotBlank(message="Product without country") */
     private string $country = '';
-    #[Assert\Count(min: 1, minMessage: "Product without images")]
+
+    /** @Assert\Count(min=1, minMessage="Product without images") */
     private array $photos = [];
+
     private ?string $firstImage = '';
-    #[Assert\GreaterThan(value: 0, message: "Product with zero quantity")]
+
+    /** @Assert\GreaterThan(value=0, message="Product with zero quantity") */
     private float $quantity = 0.0;
-    #[Assert\NotBlank(message: "Product without mpn")]
+
+    /** @Assert\NotBlank(message="Product without mpn") */
     private string $mpn = '';
 
     public function __toString(): string

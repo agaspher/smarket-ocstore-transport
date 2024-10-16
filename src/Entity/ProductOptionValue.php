@@ -4,62 +4,93 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Repository\ProductOptionValueRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ProductOptionValueRepository::class)]
-#[ORM\Table(name: "oc_product_option_value")]
+/**
+ * @ORM\Entity(repositoryClass="App\Entity\Repository\ProductOptionValueRepository")
+ * @ORM\Table(name="oc_product_option_value")
+ */
 class ProductOptionValue
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'product_option_value_id')]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(name="product_option_value_id")
+     */
     private ?int $productOptionValueId = null;
 
-    #[ORM\ManyToOne(targetEntity: ProductOption::class, inversedBy: 'productOptionValues')]
-    #[ORM\JoinColumn(name: 'product_option_id', referencedColumnName: 'product_option_id')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\ProductOption", inversedBy="productOptionValues")
+     * @ORM\JoinColumn(name="product_option_id", referencedColumnName="product_option_id")
+     */
     private ProductOption $productOption;
 
-    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'options')]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'product_id')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Product", inversedBy="options")
+     * @ORM\JoinColumn(name="product_id", referencedColumnName="product_id")
+     */
     private Product $product;
 
-    #[ORM\Column(name: 'product_id')]
+    /**
+     * @ORM\Column(name="product_id")
+     */
     private int $productId;
 
-    #[ORM\ManyToOne(targetEntity: Option::class, inversedBy: 'productOptions')]
-    #[ORM\JoinColumn(name: 'option_id', referencedColumnName: 'option_id')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Option", inversedBy="productOptions")
+     * @ORM\JoinColumn(name="option_id", referencedColumnName="option_id")
+     */
     private Option $option;
 
-    #[ORM\Column(name: 'option_id')]
+    /**
+     * @ORM\Column(name="option_id")
+     */
     private int $optionId;
 
-    #[ORM\ManyToOne(targetEntity: OptionValue::class, inversedBy: 'productOptionValues')]
-    #[ORM\JoinColumn(name: 'option_value_id', referencedColumnName: 'option_value_id')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\OptionValue", inversedBy="productOptionValues")
+     * @ORM\JoinColumn(name="option_value_id", referencedColumnName="option_value_id")
+     */
     private OptionValue $optionValue;
 
-    #[ORM\Column(name: 'quantity', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Column(name="quantity", type="integer", nullable=false)
+     */
     private int $quantity = 1;
 
-    #[ORM\Column(name: 'subtract', type: 'boolean', nullable: false)]
+    /**
+     * @ORM\Column(name="subtract", type="boolean", nullable=false)
+     */
     private bool $subtract = true;
 
-    #[ORM\Column(name: 'price', type: 'decimal', nullable: false)]
+    /**
+     * @ORM\Column(name="price", type="decimal", nullable=false)
+     */
     private float $price = 0.0;
 
-    #[ORM\Column(name: 'price_prefix', type: 'string', length: 1, nullable: false)]
+    /**
+     * @ORM\Column(name="price_prefix", type="string", length=1, nullable=false)
+     */
     private string $pricePrefix = '+';
 
-    #[ORM\Column(name: 'points', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Column(name="points", type="integer", nullable=false)
+     */
     private int $points = 0;
 
-    #[ORM\Column(name: 'points_prefix', type: 'string', length: 1, nullable: false)]
+    /**
+     * @ORM\Column(name="points_prefix", type="string", length=1, nullable=false)
+     */
     private string $pointsPrefix = '+';
 
-    #[ORM\Column(name: 'weight', type: 'decimal')]
+    /**
+     * @ORM\Column(name="weight", type="decimal")
+     */
     private float $weight = 0.0;
 
-    #[ORM\Column(name: 'weight_prefix', type: 'string', length: 1, nullable: false)]
+    /**
+     * @ORM\Column(name="weight_prefix", type="string", length=1, nullable=false)
+     */
     private string $weightPrefix = '+';
 
     public function getProductOptionValueId(): ?int
@@ -207,30 +238,6 @@ class ProductOptionValue
     public function setWeightPrefix(string $weightPrefix): self
     {
         $this->weightPrefix = $weightPrefix;
-
-        return $this;
-    }
-
-    public function getProductId(): ?int
-    {
-        return $this->productId;
-    }
-
-    public function setProductId(?int $productId): self
-    {
-        $this->productId = $productId;
-
-        return $this;
-    }
-
-    public function getOptionId(): int
-    {
-        return $this->optionId;
-    }
-
-    public function setOptionId(int $optionId): self
-    {
-        $this->optionId = $optionId;
 
         return $this;
     }

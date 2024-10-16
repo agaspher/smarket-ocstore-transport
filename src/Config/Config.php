@@ -6,6 +6,7 @@ namespace App\Config;
 
 class Config
 {
+    // this is default values, if .env exists values will be taken from it
     public static int $defaultOptionId = 13; // option "Размер"
     public static int $defaultLanguageId = 1; // RUS
     public static string $productFile = 'json/products.json';

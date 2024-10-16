@@ -6,23 +6,31 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: "oc_category_path")]
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="oc_category_path")
+ */
 class CategoryPath
 {
-    public const int ZERO_PATH_LEVEL = 0;
-    public const int FIRST_PATH_LEVEL = 1;
+    public const ZERO_PATH_LEVEL = 0;
+    public const FIRST_PATH_LEVEL = 1;
 
-    #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'paths')]
-    #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'category_id')]
+    /**
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="paths")
+     * @ORM\JoinColumn(name="category_id", referencedColumnName="category_id")
+     */
     private Category $category;
 
-    #[ORM\Id]
-    #[ORM\Column(name: 'path_id', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="path_id", type="integer", nullable=false)
+     */
     private ?int $pathId = null;
 
-    #[ORM\Column(name: 'level', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Column(name="level", type="integer", nullable=false)
+     */
     private int $level = 1;
 
     public function getCategory(): Category

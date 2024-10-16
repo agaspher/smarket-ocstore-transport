@@ -192,7 +192,11 @@ class Stats
 
     public function getDuration(): int
     {
-        return $this->endTime?->getTimestamp() - $this->startTime?->getTimestamp();
+        if ($this->startTime && $this->endTime) {
+            return $this->endTime->getTimestamp() - $this->startTime->getTimestamp();
+        }
+
+        return 0;
     }
 
     public function addError(array $error): void
@@ -223,7 +227,7 @@ class Stats
         $qb->delete()
             ->from(Log::class, 'l')
             ->where('l.dateAdded <= :targetDate')
-            ->setParameter('targetDate', (new DateTimeImmutable('-1 month'))->format('Y-m-d'));
+            ->setParameter('targetDate', (new DateTimeImmutable('-1 week'))->format('Y-m-d'));
 
         $qb->getQuery()->getResult();
     }
@@ -235,7 +239,7 @@ class Stats
                 $newLog = (new Log())
                     ->setEntityId($entityId)
                     ->setImportType($this->getImportType())
-                    ->setMsg($message);
+                    ->setMsg(str_replace("\n   ", "", $message));
 
                 $this->em->persist($newLog);
             }

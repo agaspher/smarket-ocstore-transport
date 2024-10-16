@@ -6,28 +6,39 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: "oc_product_option")]
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="oc_product_option")
+ */
 class ProductOption
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'product_option_id')]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(name="product_option_id")
+     */
     private ?int $productOptionId = null;
 
-    #[ORM\ManyToOne(targetEntity: Product::class, fetch: 'EAGER', inversedBy: 'productOptions')]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'product_id')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Product", fetch="EAGER", inversedBy="productOptions")
+     * @ORM\JoinColumn(name="product_id", referencedColumnName="product_id")
+     */
     private Product $product;
 
-
-    #[ORM\ManyToOne(targetEntity: Option::class, inversedBy: 'productOptions')]
-    #[ORM\JoinColumn(name: 'option_id', referencedColumnName: 'option_id')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Option", inversedBy="productOptions")
+     * @ORM\JoinColumn(name="option_id", referencedColumnName="option_id")
+     */
     private Option $option;
 
-    #[ORM\Column(name: 'value', type: 'text', nullable: false)]
+    /**
+     * @ORM\Column(name="value", type="text", nullable=false)
+     */
     private string $value = '';
 
-    #[ORM\Column(name: 'required', type: 'boolean')]
+    /**
+     * @ORM\Column(name="required", type="boolean")
+     */
     private bool $required = false;
 
     public function getProductOptionId(): ?int
@@ -71,26 +82,14 @@ class ProductOption
         return $this;
     }
 
-    public function isRequire(): bool
+    public function isRequired(): bool
     {
-        return $this->require;
+        return $this->required;
     }
 
-    public function setRequire(bool $require): self
+    public function setRequired(bool $required): self
     {
-        $this->require = $require;
-
-        return $this;
-    }
-
-    public function getProductId(): int
-    {
-        return $this->productId;
-    }
-
-    public function setProductId(int $productId): self
-    {
-        $this->productId = $productId;
+        $this->required = $required;
 
         return $this;
     }

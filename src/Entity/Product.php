@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Repository\ProductRepository;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Context;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
-#[ORM\Entity(repositoryClass: ProductRepository::class)]
-#[ORM\Table(name: "oc_product")]
-#[ORM\HasLifecycleCallbacks]
+/**
+ * @ORM\Entity(repositoryClass="App\Entity\Repository\ProductRepository")
+ * @ORM\Table(name="oc_product")
+ * @ORM\HasLifecycleCallbacks
+ */
 class Product
 {
-    private const string MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
-    private const string MYSQL_DATE_FORMAT = 'Y-m-d';
+    public const MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
+    public const MYSQL_DATE_FORMAT = 'Y-m-d';
 
     /**
      * Отсутствие на складе
@@ -30,212 +31,286 @@ class Product
      * 5 - Нет в наличии
      * 6 - Ожидание 2-3 дня
      */
-    private const int STOCK_STATUS_ID = 5;
+    private const STOCK_STATUS_ID = 5;
 
     /**
      * Необходима доставка
      * 1 - true
      * 2 - false
      */
-    private const int SHIPPING = 1;
+    private const SHIPPING = 1;
 
     /**
      * Единица измерения веса
      * 1 - кг
      * 2 - грамм
      */
-    private const int WEITH_CLASS_ID = 1;
+    private const WEITH_CLASS_ID = 1;
 
     /**
      * Единица измерения длинны
      * 1 - см
      * 2 - миллиметр
      */
-    private const int LENGTH_CLASS_ID = 1;
+    private const LENGTH_CLASS_ID = 1;
 
     /**
      * Вычитать со склада
      * 1 - true
      * 2 - false
      */
-    private const int SUBTRACT = 1;
+    private const SUBTRACT = 1;
 
     /**
      * Минимальное кол-во для заказа
      */
-    private const int MINIMUM = 1;
+    private const MINIMUM = 1;
 
     /**
      * Статус
      * 1 - Включено
      * 2 - Выключено
      */
-    private const int STATUS = 1;
+    private const STATUS = 1;
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'product_id')]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(name="product_id")
+     */
     private ?int $productId = null;
 
-    #[ORM\Column(name: 'model', type: 'string', length: 64, nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="model", type="string", length=64, nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $model = '';
 
-    #[ORM\Column(name: 'sku', type: 'string', length: 64, nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="sku", type="string", length=64, nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $sku = '';
 
-    #[ORM\Column(name: 'upc', type: 'string', length: 12, nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="upc", type="string", length=12, nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $upc = '';
 
-    #[ORM\Column(name: 'ean', type: 'string', length: 14, nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="ean", type="string", length=14, nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $ean = '';
 
-    #[ORM\Column(name: 'jan', type: 'string', length: 13, nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="jan", type="string", length=13, nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $jan = '';
 
-    #[ORM\Column(name: 'isbn', type: 'string', length: 17, nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="isbn", type="string", length=17, nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $isbn = '';
 
-    #[ORM\Column(name: 'mpn', type: 'text', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="mpn", type="text", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $mpn = '';
 
-    #[ORM\Column(name: 'location', type: 'string', length: 128, nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="location", type="string", length=128, nullable=false)
+     * @Groups({"sm_import"})
+     */
     private string $location = '';
 
-    #[ORM\Column(name: 'quantity', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="quantity", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $quantity = 0;
 
-    #[ORM\Column(name: 'stock_status_id', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="stock_status_id", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $stockStatusId = 0;
 
-    #[ORM\Column(name: 'image', type: 'string', length: 255, nullable: true)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="image", type="string", length=255, nullable=true)
+     * @Groups({"sm_import"})
+     */
     private ?string $image = null;
 
-    #[ORM\Column(name: 'manufacturer_id', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="manufacturer_id", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $manufacturerId = 0;
 
-    #[ORM\Column(name: 'shipping', type: 'smallint', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="shipping", type="smallint", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $shipping = 0;
 
-    #[ORM\Column(name: 'price', type: 'float', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="price", type="float", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private float $price = 0.0;
 
-    #[ORM\Column(name: 'points', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="points", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $points = 0;
 
-    #[ORM\Column(name: 'tax_class_id', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="tax_class_id", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $taxClassId = 0;
 
-    #[ORM\Column(name: 'date_available', type: 'date', nullable: false)]
-    #[Groups(['sm_import'])]
-    #[Context(
-        context: [DateTimeNormalizer::FORMAT_KEY => self::MYSQL_DATE_FORMAT],
-        groups: ['sm_import'],
-    )]
+    /**
+     * @ORM\Column(name="date_available", type="date", nullable=false)
+     * @Groups({"sm_import"})
+     * @Context(
+     *     context={DateTimeNormalizer::FORMAT_KEY, self::MYSQL_DATE_FORMAT},
+     *     groups={"sm_import"}
+     * )
+     */
     private DateTime $dateAvailable;
 
-    #[ORM\Column(name: 'weight', type: 'float', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="weight", type="float", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private float $weight = 0.0;
 
-    #[ORM\Column(name: 'weight_class_id', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="weight_class_id", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $weightClassId = 0;
 
-    #[ORM\Column(name: 'length', type: 'float', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="length", type="float", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private float $length = 0.0;
 
-    #[ORM\Column(name: 'width', type: 'float', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="width", type="float", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private float $width = 0.0;
 
-    #[ORM\Column(name: 'height', type: 'float', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="height", type="float", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private float $height = 0.0;
 
-    #[ORM\Column(name: 'length_class_id', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="length_class_id", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $lengthClassId = 0;
 
-    #[ORM\Column(name: 'subtract', type: 'smallint', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="subtract", type="smallint", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $subtract = 0;
 
-    #[ORM\Column(name: 'minimum', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="minimum", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $minimum = 0;
 
-    #[ORM\Column(name: 'sort_order', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="sort_order", type="integer", nullable=false)
+     */
     private int $sortOrder = 0;
 
-    #[ORM\Column(name: 'status', type: 'smallint', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="status", type="boolean", nullable=false)
+     */
     private int $status = 0;
 
-    #[ORM\Column(name: 'viewed', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="viewed", type="integer", nullable=false)
+     */
     private int $viewed = 0;
 
-    #[ORM\Column(name: 'date_added', type: 'datetime_immutable', nullable: false)]
-    #[Groups(['sm_import'])]
-    #[Context(
-        context: [DateTimeNormalizer::FORMAT_KEY => self::MYSQL_DATETIME_FORMAT],
-        groups: ['sm_import'],
-    )]
+    /**
+     * @ORM\Column(name="date_added", nullable=false)
+     */
     private DateTimeImmutable $dateAdded;
 
-    #[ORM\Column(name: 'date_modified', type: 'datetime_immutable', nullable: false)]
-    #[Groups(['sm_import'])]
-    #[Context(
-        context: [DateTimeNormalizer::FORMAT_KEY => self::MYSQL_DATETIME_FORMAT],
-        groups: ['sm_import'],
-    )]
+    /**
+     * @ORM\Column(name="date_modified", nullable=false)
+     */
     private DateTimeImmutable $dateModified;
 
-    #[ORM\Column(name: 'viewed_mmlivesearch', type: 'integer', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="viewed_mmlivesearch", type="integer", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private int $viewedMmlivesearch = 0;
 
-    #[ORM\Column(name: 'special', type: 'float', nullable: false)]
-    #[Groups(['sm_import'])]
+    /**
+     * @ORM\Column(name="special", type="float", nullable=false)
+     * @Groups({"sm_import"})
+     */
     private float $special = 0.0;
 
-    #[ORM\OneToMany(targetEntity: ExtraImage::class, mappedBy: 'product')]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ExtraImage", mappedBy="product")
+     */
     private Collection $extraImages;
 
-    #[ORM\OneToMany(targetEntity: ProductDescription::class, mappedBy: 'product', cascade: ['persist'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ProductDescription",
+     *     mappedBy="product", cascade={"persist", "remove"}, orphanRemoval=true
+     * )
+     */
     private Collection $descriptions;
 
-    #[ORM\OneToMany(targetEntity: ProductOptionValue::class, mappedBy: 'product', cascade: ['persist'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ProductOptionValue",
+     *     mappedBy="product", cascade={"persist"}
+     * )
+     */
     private Collection $productOptionValues;
 
-    #[ORM\OneToMany(targetEntity: ProductOption::class, mappedBy: 'product', cascade: ['persist'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ProductOption",
+     *     mappedBy="product", cascade={"persist"}
+     * )
+     */
     private Collection $productOptions;
 
-    #[ORM\JoinTable(name: 'oc_product_to_category')]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'product_id')]
-    #[ORM\InverseJoinColumn(name: 'category_id', referencedColumnName: 'category_id')]
-    #[ORM\ManyToMany(targetEntity: Category::class)]
+    /**
+     * @ORM\JoinTable(name="oc_product_to_category",
+     *     joinColumns={@ORM\JoinColumn(name="product_id", referencedColumnName="product_id")},
+     *     inverseJoinColumns={@ORM\JoinColumn(name="category_id", referencedColumnName="category_id")}
+     * )
+     * @ORM\ManyToMany(targetEntity="App\Entity\Category")
+     */
     private Collection $categories;
 
-    #[ORM\OneToMany(targetEntity: ProductToStore::class, mappedBy: 'product')]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ProductToStore",
+     *     mappedBy="product"
+     * )
+     */
     private Collection $stores;
 
     public function __construct()
@@ -258,11 +333,15 @@ class Product
         $this->minimum = self::MINIMUM;
     }
 
-    #[ORM\PreUpdate]
+    /**
+     * @ORM\PreUpdate
+     */
     public function renewDateModified(): void
     {
         $this->dateModified = new DateTimeImmutable();
     }
+
+    // ... Getter and Setter methods ...
 
     public function getProductId(): ?int
     {
@@ -655,7 +734,11 @@ class Product
 
     public function getExtraImages(): Collection
     {
-        return $this->extraImages;
+        if ($this->extraImages) {
+            return $this->extraImages;
+        }
+
+        return new ArrayCollection();
     }
 
     public function setExtraImages(Collection $extraImages): self
@@ -691,6 +774,9 @@ class Product
         return false;
     }
 
+    /**
+     * @return Collection|ProductDescription[]
+     */
     public function getDescriptions(): Collection
     {
         return $this->descriptions;
@@ -719,7 +805,7 @@ class Product
         return false;
     }
 
-    public function getDescriptionByKey(int $languageId): ProductDescription|null
+    public function getDescriptionByKey(int $languageId): ?ProductDescription
     {
         $found = $this->descriptions->filter(
             fn($desc) => $desc->getLanguageId() === $languageId
@@ -739,9 +825,15 @@ class Product
         }
     }
 
-    public function getExtraImage(string $image): ExtraImage|null
+    public function getExtraImage(string $image): ?ExtraImage
     {
-        $found = $this->extraImages->filter(
+        $extraImages = $this->getExtraImages();
+
+        if (count($extraImages) < 1) {
+            return null;
+        }
+
+        $found = $extraImages->filter(
             fn($ext) => $ext->getImage() === $image
         );
 
@@ -759,7 +851,7 @@ class Product
         return $this;
     }
 
-    public function getStore(): ProductToStore|null
+    public function getStore(): ?ProductToStore
     {
         $founded = $this->stores->first();
 

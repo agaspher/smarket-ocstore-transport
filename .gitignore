@@ -1,6 +1,6 @@
 vendor
+.idea
 .env
 *.excalidraw
 *.uml
 json
-src/Config/Config.php

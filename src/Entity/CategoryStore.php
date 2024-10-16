@@ -6,18 +6,23 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: "oc_category_to_store")]
-
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="oc_category_to_store")
+ */
 class CategoryStore
 {
-    #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'stores')]
-    #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'category_id')]
+    /**
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="stores")
+     * @ORM\JoinColumn(name="category_id", referencedColumnName="category_id")
+     */
     private Category $category;
 
-    #[ORM\Id]
-    #[ORM\Column(name: 'store_id', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="store_id", type="integer", nullable=false)
+     */
     private int $storeId = 0;
 
     public function getCategory(): Category
@@ -30,6 +35,7 @@ class CategoryStore
         $this->category = $category;
 
         $category->addStore($this);
+
         return $this;
     }
 

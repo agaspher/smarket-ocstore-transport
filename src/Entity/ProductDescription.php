@@ -6,38 +6,57 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: "oc_product_description")]
-#[ORM\Index(name: 'name', columns: ['name'])]
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="oc_product_description", indexes={
+ *     @ORM\Index(name="name", columns={"name"})
+ * })
+ */
 class ProductDescription
 {
-    public const int DEFAULT_LANGUAGE_ID = 1;
+    public const DEFAULT_LANGUAGE_ID = 1;
 
-    #[ORM\Id]
-    #[ORM\Column(name: 'language_id', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="language_id", type="integer", nullable=false)
+     */
     private int $languageId = self::DEFAULT_LANGUAGE_ID;
 
-    #[ORM\Column(name: 'name', type: 'string', length: 255, nullable: false)]
+    /**
+     * @ORM\Column(name="name", type="string", length=255, nullable=false)
+     */
     private string $name = '';
 
-    #[ORM\Column(name: 'description', type: 'text', nullable: false)]
+    /**
+     * @ORM\Column(name="description", type="text", nullable=false)
+     */
     private string $description = '';
 
-    #[ORM\Column(name: 'tag', type: 'text', nullable: false)]
+    /**
+     * @ORM\Column(name="tag", type="text", nullable=false)
+     */
     private string $tag = '';
 
-    #[ORM\Column(name: 'meta_title', type: 'string', length: 255, nullable: false)]
+    /**
+     * @ORM\Column(name="meta_title", type="string", length=255, nullable=false)
+     */
     private string $metaTitle = '';
 
-    #[ORM\Column(name: 'meta_description', type: 'string', length: 255, nullable: false)]
+    /**
+     * @ORM\Column(name="meta_description", type="string", length=255, nullable=false)
+     */
     private string $metaDescription = '';
 
-    #[ORM\Column(name: 'meta_keyword', type: 'string', length: 255, nullable: false)]
+    /**
+     * @ORM\Column(name="meta_keyword", type="string", length=255, nullable=false)
+     */
     private string $metaKeyword = '';
 
-    #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'descriptions')]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'product_id')]
+    /**
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="App\Entity\Product", inversedBy="descriptions")
+     * @ORM\JoinColumn(name="product_id", referencedColumnName="product_id")
+     */
     private Product $product;
 
     public function getLanguageId(): int
@@ -134,6 +153,7 @@ class ProductDescription
         $this->product = $product;
 
         $product->addDescription($this);
+
         return $this;
     }
 }

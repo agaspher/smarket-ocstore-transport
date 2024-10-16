@@ -1,70 +1,92 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Repository\CategoryRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Annotation\Context;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
-#[ORM\Entity(repositoryClass: CategoryRepository::class)]
-#[ORM\Table(name: "oc_category")]
-#[ORM\HasLifecycleCallbacks]
+/**
+ * @ORM\Entity(repositoryClass="App\Entity\Repository\CategoryRepository")
+ * @ORM\Table(name="oc_category")
+ * @ORM\HasLifecycleCallbacks
+ */
 class Category
 {
-    public const int CATEGORY_STATUS_DISABLED = 0;
-    public const int CATEGORY_STATUS_ENABLED = 1;
+    public const CATEGORY_STATUS_DISABLED = 0;
+    public const CATEGORY_STATUS_ENABLED = 1;
 
-    private const string MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
+    public const MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
 
-    #[ORM\Id]
-    #[ORM\Column(name: 'category_id')]
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="category_id", type="integer")
+     */
     private int $categoryId = 0;
 
-    #[ORM\Column(name: 'parent_id', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Column(name="parent_id", type="integer", nullable=false)
+     */
     private int $parentId = 0;
 
-    #[ORM\Column(name: 'top', type: 'smallint', nullable: false)]
+    /**
+     * @ORM\Column(name="top", type="smallint", nullable=false)
+     */
     private int $top = 1;
 
-    #[ORM\Column(name: "`column`", type: 'integer', nullable: false)]
+    /**
+     * @ORM\Column(name="`column`", type="integer", nullable=false)
+     */
     private int $column = 1;
 
-    #[ORM\Column(name: 'status', type: 'smallint', nullable: false)]
+    /**
+     * @ORM\Column(name="status", type="smallint", nullable=false)
+     */
     private int $status = 1;
 
-    #[ORM\OneToMany(targetEntity: CategoryDescription::class, mappedBy: 'category', cascade: ['persist'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CategoryDescription", mappedBy="category", cascade={"persist"})
+     */
     private Collection $descriptions;
 
-    #[ORM\OneToMany(targetEntity: CategoryPath::class, mappedBy: 'category', cascade: ['persist'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CategoryPath", mappedBy="category", cascade={"persist"})
+     */
     private Collection $paths;
 
-    #[ORM\OneToMany(targetEntity: CategoryStore::class, mappedBy: 'category', cascade: ['persist'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CategoryStore", mappedBy="category", cascade={"persist"})
+     */
     private Collection $stores;
 
-    #[ORM\Column(name: 'date_added', type: 'datetime_immutable', nullable: false)]
-    #[Groups(['sm_import'])]
-    #[Context(
-        context: [DateTimeNormalizer::FORMAT_KEY => self::MYSQL_DATETIME_FORMAT],
-        groups: ['sm_import'],
-    )]
+    /**
+     * @ORM\Column(name="date_added", type="datetime_immutable", nullable=false)
+     * @Groups({"sm_import"})
+     * @Context(
+     *     context={DateTimeNormalizer::FORMAT_KEY=self::MYSQL_DATETIME_FORMAT},
+     *     groups={"sm_import"}
+     * )
+     */
     private DateTimeImmutable $dateAdded;
 
-    #[ORM\Column(name: 'date_modified', type: 'datetime_immutable', nullable: false)]
-    #[Groups(['sm_import'])]
-    #[Context(
-        context: [DateTimeNormalizer::FORMAT_KEY => self::MYSQL_DATETIME_FORMAT],
-        groups: ['sm_import'],
-    )]
+    /**
+     * @ORM\Column(name="date_modified", type="datetime_immutable", nullable=false)
+     * @Groups({"sm_import"})
+     * @Context(
+     *     context={DateTimeNormalizer::FORMAT_KEY=self::MYSQL_DATETIME_FORMAT},
+     *     groups={"sm_import"}
+     * )
+     */
     private DateTimeImmutable $dateModified;
 
-    #[ORM\Column(name: 'viewed_mmlivesearch', type: 'integer', nullable: false)]
+    /**
+     * @ORM\Column(name="viewed_mmlivesearch", type="integer", nullable=false)
+     */
     private int $viewedMmlivesearch = 1;
 
     public function __construct()
@@ -76,7 +98,9 @@ class Category
         $this->paths = new ArrayCollection();
     }
 
-    #[ORM\PreUpdate]
+    /**
+     * @ORM\PreUpdate
+     */
     public function renewDateModified(): void
     {
         $this->dateModified = new DateTimeImmutable();
@@ -165,7 +189,7 @@ class Category
         return false;
     }
 
-    public function getDescriptionByKey(int $languageId): CategoryDescription|null
+    public function getDescriptionByKey(int $languageId): ?CategoryDescription
     {
         $found = $this->descriptions->filter(
             fn($desc) => $desc->getLanguageId() === $languageId
@@ -201,7 +225,7 @@ class Category
     {
         $found = $this->paths->filter(
             fn($path) => (
-                    $this->getCategoryId() === $check->getCategory()?->getCategoryId())
+                    $this->getCategoryId() === $check->getCategory()->getCategoryId())
                 && $path->getPathId() === $check->getPathId()
         );
 
@@ -217,7 +241,7 @@ class Category
         // or can make just return $this->stores->count() > 0;
         $found = $this->stores->filter(
             fn($store) => (
-                $this->getCategoryId() === $check->getCategory()?->getCategoryId())
+                $this->getCategoryId() === $check->getCategory()->getCategoryId())
         );
 
         if ($found->count() > 0) {

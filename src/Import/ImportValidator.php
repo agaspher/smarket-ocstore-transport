@@ -14,7 +14,7 @@ class ImportValidator
     {
         $errors = [];
         $validator = Validation::createValidatorBuilder()
-            ->enableAttributeMapping()
+            ->enableAnnotationMapping()
             ->getValidator();
 
         foreach ($targets as $target) {

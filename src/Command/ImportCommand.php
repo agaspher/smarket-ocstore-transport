@@ -22,28 +22,29 @@ use App\Entity\ProductToStore;
 use App\Import\ImporterFactory;
 use App\Stats;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(
-    name: 'import-products',
-    description: 'Run import from json to DB',
-    aliases: ['i-p'],
-)]
 class ImportCommand extends Command
 {
-    public function __construct(
-        private EntityManager $em
-    ) {
+    protected static $defaultName = 'import-products';
+
+    protected static $defaultDescription = 'Run import from json to DB';
+
+    private EntityManager $em;
+
+    public function __construct(EntityManager $em)
+    {
+        $this->em = $em;
         parent::__construct();
     }
 
     protected function configure()
     {
+        $this->setAliases(['i-p']);
         $this->addOption(
             'clear-all',
             null,
@@ -138,8 +139,13 @@ class ImportCommand extends Command
             $io->writeln($msg);
             $stats->addError([$msg]);
 
-            $qb = $this->em->getRepository($class)?->createQueryBuilder('t');
-            $qb->delete()->getQuery()->execute();
+            $qb = $this->em->getRepository($class);
+
+            if ($qb) {
+                $qb = $qb->createQueryBuilder('t');
+                $qb->delete()->getQuery()->execute();
+            }
+
         }
         $io->title('Database is cleared.');
 

@@ -8,11 +8,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class CategoryDto
 {
-    #[Assert\NotNull(message: "Category without categoryId")]
+    /** @Assert\NotNull(message="Category without categoryId") */
     private ?int $categoryId = null;
-    #[Assert\NotNull(message: "Category without parentId")]
+    /** @Assert\NotNull(message="Category without parentId") */
     private ?int $parentId = null;
-    #[Assert\Length(min: 3, minMessage: "Category with very short name")]
+    /** @Assert\Length(min=3, minMessage="Category with very short name") */
     private string $name = '';
 
     public function getCategoryId(): ?int

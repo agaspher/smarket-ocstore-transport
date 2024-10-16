@@ -9,11 +9,12 @@ use JsonSchema\Exception\ResourceNotFoundException;
 
 class JsonReader implements ReaderInterface
 {
-    private const array SUPPORTED_TYPES = ['json'];
+    private const SUPPORTED_TYPES = ['json'];
+    private ?string $source = '';
 
-    public function __construct(
-        readonly private ?string $source
-    ) {
+    public function __construct(?string $source)
+    {
+        $this->source = $source;
     }
 
     public function read(string $path = null, int $chunkSize = 2000): iterable

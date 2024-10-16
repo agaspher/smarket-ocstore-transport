@@ -20,7 +20,7 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -129,7 +129,7 @@ class ProductImporter implements ImporterInterface
 
     private function initSerializer(): void
     {
-        $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
+        $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader());
         $normalizers = [
             new DateTimeNormalizer(),
             new ObjectNormalizer($classMetadataFactory, new CamelCaseToSnakeCaseNameConverter()),
@@ -259,7 +259,7 @@ class ProductImporter implements ImporterInterface
         $categories = $this->em->getRepository(Category::class)->getCategories();
 
         $currentCategory = $categories[$data->getClassif()] ?? null;
-        $productCategory = $product->getCategories()?->first();
+        $productCategory = $product->getCategories()->first();
 
         if ($currentCategory) {
             $newCat = $currentCategory;

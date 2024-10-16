@@ -1,4 +1,4 @@
-FROM php:8.3-cli-alpine
+FROM php:7.4-cli-alpine
 
 # Set default user ID and group ID
 ARG UID=1000

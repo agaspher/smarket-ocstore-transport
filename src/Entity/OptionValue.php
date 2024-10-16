@@ -8,27 +8,38 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: "oc_option_value")]
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="oc_option_value")
+ */
 class OptionValue
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'option_value_id')]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(name="option_value_id")
+     */
     private ?int $optionValueId = null;
 
-    // not necessary we can just use default option id from config
-    #[ORM\ManyToOne(targetEntity: Option::class, inversedBy: 'optionValues')]
-    #[ORM\JoinColumn(name: 'option_id', referencedColumnName: 'option_id')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Option", inversedBy="optionValues")
+     * @ORM\JoinColumn(name="option_id", referencedColumnName="option_id")
+     */
     private ?Option $option = null;
 
-    #[ORM\Column(name: 'image', type: 'string', length: 255, nullable: false)]
+    /**
+     * @ORM\Column(name="image", type="string", length=255, nullable=false)
+     */
     private string $image = '';
 
-    #[ORM\Column(name: 'sort_order', nullable: false)]
+    /**
+     * @ORM\Column(name="sort_order", nullable=false)
+     */
     private int $sortOrder = 0;
 
-    #[ORM\OneToMany(targetEntity: OptionValueDescription::class, mappedBy: 'optionValue', cascade: ['persist'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\OptionValueDescription", mappedBy="optionValue", cascade={"persist"})
+     */
     private Collection $descriptions;
 
     public function __construct()
@@ -36,7 +47,7 @@ class OptionValue
         $this->descriptions = new ArrayCollection();
     }
 
-    public function getOptionValueId(): int
+    public function getOptionValueId(): ?int
     {
         return $this->optionValueId;
     }
@@ -48,7 +59,7 @@ class OptionValue
         return $this;
     }
 
-    public function getOption(): Option
+    public function getOption(): ?Option
     {
         return $this->option;
     }
@@ -100,23 +111,9 @@ class OptionValue
     {
         if (!$this->descriptions->contains($desc)) {
             $this->descriptions->add($desc);
-
             $desc->setOptionValue($this);
         }
 
         return $this;
     }
-
-    public function getOptionId(): int
-    {
-        return $this->optionId;
-    }
-
-    public function setOptionId(int $optionId): self
-    {
-        $this->optionId = $optionId;
-
-        return $this;
-    }
-
 }

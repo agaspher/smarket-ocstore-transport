@@ -195,10 +195,15 @@ class SizesImporter implements ImporterInterface
         $mapped = [];
         /** @var ProductOptionValue $tie */
         foreach ($ties as $tie) {
-            $name = $tie->getOptionValue()
+            $optionValue = $tie->getOptionValue()
                 ->getDescriptions()
                 ->filter(fn($desc) => $desc->getLanguageId() === Config::$defaultLanguageId)
-                ->first()?->getName();
+                ->first();
+
+            $name = null;
+            if ($optionValue) {
+                $name = $optionValue->getName();
+            }
 
             if ($name) {
                 $mapped[sprintf('%s-%s', $tie->getProduct()->getSku(), $name)] = $tie;
