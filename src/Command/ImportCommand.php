@@ -19,6 +19,8 @@ use App\Entity\ProductDescription;
 use App\Entity\ProductOption;
 use App\Entity\ProductOptionValue;
 use App\Entity\ProductToStore;
+use App\Exception\AppException;
+use App\Exception\AppExceptionInterface;
 use App\Import\ImporterFactory;
 use App\Stats;
 use Doctrine\ORM\EntityManager;
@@ -78,8 +80,12 @@ class ImportCommand extends Command
         foreach ($mapping as $target => $source) {
             $importer = $factory->createImporter($source, $target, $this->em);
 
-            $stats = $importer->import($io);
-            $this->renderStatAsTable($stats, $io);
+            try {
+                $stats = $importer->import($io);
+                $this->renderStatAsTable($stats, $io);
+            } catch (AppExceptionInterface $e) {
+                $io->error($e->getMessage());
+            }
         }
 
         $io->title("Import is finished.");

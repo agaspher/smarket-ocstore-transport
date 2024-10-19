@@ -19,6 +19,7 @@ class Config
     public static string $databasePassword = 'password';
     public static string $databaseHost = 'host';
     public static string $databaseDriver = 'pdo_mysql';
+    public static bool $deactivateEmptyCategories = false;
 
     public static function initialize(): void
     {
@@ -40,6 +41,7 @@ class Config
         self::$databasePassword = $loadedConfig['DATABASE_PASSWORD'] ?? self::$databasePassword;
         self::$databaseHost = $loadedConfig['DATABASE_HOST'] ?? self::$databaseHost;
         self::$databaseDriver = $loadedConfig['DATABASE_DRIVER'] ?? self::$databaseDriver;
+        self::$deactivateEmptyCategories = (bool)$loadedConfig['DEACTIVATE_EMPTY_CATEGORIES'] ?? self::$deactivateEmptyCategories;
     }
 
     public static function getDbConnParams(): array

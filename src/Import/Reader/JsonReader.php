@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Import\Reader;
 
+use App\Exception\FileNotFoundException;
 use Cerbero\JsonParser\JsonParser;
-use JsonSchema\Exception\ResourceNotFoundException;
 
 class JsonReader implements ReaderInterface
 {
@@ -19,11 +19,13 @@ class JsonReader implements ReaderInterface
 
     public function read(string $path = null, int $chunkSize = 2000): iterable
     {
-        if (!$path && !$this->source) {
-            throw  new ResourceNotFoundException('You have to point a json resource.');
+        $source = $path ?? $this->source;
+
+        if (!file_exists($source)) {
+            throw  new FileNotFoundException(sprintf('File [%s] not found.', $source));
         }
 
-        $parser = new JsonParser($path ?? $this->source);
+        $parser = new JsonParser($source);
 
         $i = 0;
         $chunk = [];

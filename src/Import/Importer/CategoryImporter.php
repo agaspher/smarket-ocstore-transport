@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Import\Importer;
 
+use App\Config\Config;
 use App\DTO\CategoryDto;
 use App\Entity\Category;
 use App\Entity\CategoryDescription;
@@ -49,7 +50,9 @@ class CategoryImporter implements ImporterInterface
             $progressIndicator->advance();
         }
 
-        $this->deactivateEmptyCategories();
+        if (Config::$deactivateEmptyCategories) {
+            $this->deactivateEmptyCategories();
+        }
 
         $this->stats->setUsedMemory((int)(memory_get_usage() / 1024 / 1024));
         $this->stats->setEndTime(new DateTimeImmutable('now'));
@@ -58,6 +61,7 @@ class CategoryImporter implements ImporterInterface
         $this->stats->setEndTime(new DateTimeImmutable('now'));
 
         $this->stats->saveLog();
+
         return $this->stats;
     }
 
